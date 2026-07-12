@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>欢迎光临 · 泡泡浴之约</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", serif;
+    background: #2a0f28;
+  }
+  .scene {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 80%, rgba(255, 200, 170, 0.35) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 25%, rgba(255, 180, 170, 0.28) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(255, 170, 140, 0.4) 0%, transparent 55%),
+      linear-gradient(160deg, #3c1838 0%, #7a3050 45%, #b8654f 78%, #d89670 100%);
+    animation: bgShift 12s ease-in-out infinite;
+  }
+  @keyframes bgShift {
+    0%, 100% { filter: brightness(1) saturate(1); }
+    50%      { filter: brightness(1.15) saturate(1.1); }
+  }
+
+  /* candle flicker overlay */
+  .flicker {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 60%, rgba(255,220,180,0.18) 0%, transparent 60%);
+    mix-blend-mode: screen;
+    animation: flick 3.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes flick {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    45%      { opacity: 0.9; transform: scale(1.05); }
+    70%      { opacity: 0.4; transform: scale(0.98); }
+  }
+
+  /* falling petals */
+  .petal {
+    position: absolute;
+    width: 22px; height: 14px;
+    background: linear-gradient(135deg, #e88598 0%, #c94a6b 100%);
+    border-radius: 60% 40% 55% 45% / 70% 30% 70% 30%;
+    opacity: 0.85;
+    animation: fall linear infinite;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+  }
+  @keyframes fall {
+    0%   { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.85; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* rising bubbles */
+  .bubble {
+    position: absolute; bottom: -50px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.2) 50%, transparent 70%);
+    border: 1px solid rgba(255,255,255,0.4);
+    animation: rise linear infinite;
+    pointer-events: none;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    10%  { opacity: 0.9; }
+    90%  { opacity: 0.9; }
+    100% { transform: translateY(-115vh) translateX(30px); opacity: 0; }
+  }
+
+  /* center card */
+  .card {
+    position: relative;
+    height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+  }
+  .welcome {
+    font-size: clamp(28px, 7vw, 46px);
+    font-weight: 700;
+    color: #fff6ec;
+    letter-spacing: 4px;
+    text-shadow: 0 3px 12px rgba(60,10,30,0.5), 0 0 30px rgba(255,220,190,0.4);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: rise-in 1.4s 0.3s ease-out forwards;
+  }
+  .welcome span {
+    display: inline-block;
+    opacity: 0;
+    animation: char-in 0.6s ease-out forwards;
+  }
+  @keyframes rise-in {
+    0%   { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes char-in {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.8); filter: blur(4px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  .name-line {
+    font-size: clamp(24px, 6vw, 38px);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 6px;
+    margin-bottom: 30px;
+    opacity: 0;
+    animation: rise-in 1.4s 1.6s ease-out forwards;
+    text-shadow: 0 2px 12px rgba(80, 20, 40, 0.6), 0 0 24px rgba(255, 200, 180, 0.5);
+  }
+  .name-line em {
+    font-style: normal;
+    background: linear-gradient(135deg, #ffe4c4, #ffb0a0, #ffd7c0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding: 0 4px;
+  }
+
+  .subtitle {
+    font-size: clamp(16px, 4vw, 22px);
+    color: rgba(255, 240, 230, 0.88);
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: rise-in 1.4s 2.6s ease-out forwards;
+  }
+
+  /* animated bathtub icon */
+  .tub {
+    width: clamp(120px, 30vw, 180px);
+    height: clamp(75px, 19vw, 115px);
+    position: relative;
+    margin: 10px auto 30px;
+    opacity: 0;
+    animation: rise-in 1.4s 3.2s ease-out forwards;
+  }
+  .tub-body {
+    position: absolute; left: 8%; right: 8%; top: 30%; bottom: 0;
+    background: linear-gradient(180deg, #fff5eb 0%, #ffe0c9 100%);
+    border-radius: 12% 12% 30% 30% / 20% 20% 60% 60%;
+    box-shadow: inset 0 -8px 16px rgba(180,90,80,0.25), 0 6px 18px rgba(40,10,25,0.35);
+  }
+  .tub-legs {
+    position: absolute; bottom: -8%; left: 0; right: 0;
+    display: flex; justify-content: space-between;
+    padding: 0 6%;
+  }
+  .tub-legs span {
+    width: 8%; height: 12%;
+    background: #b87e5c;
+    border-radius: 2px 2px 6px 6px;
+  }
+  .tub-water {
+    position: absolute; left: 12%; right: 12%; top: 38%; height: 14%;
+    background: linear-gradient(180deg, rgba(255,180,200,0.85), rgba(220,120,150,0.6));
+    border-radius: 40% 40% 6% 6%;
+    overflow: visible;
+  }
+  .foam {
+    position: absolute; top: -60%; left: -5%; right: -5%; height: 100%;
+    display: flex; justify-content: space-around; align-items: flex-end;
+  }
+  .foam b {
+    display: block;
+    width: 22%; aspect-ratio: 1;
+    background: radial-gradient(circle at 35% 30%, #fff, rgba(255,240,240,0.7));
+    border-radius: 50%;
+    animation: foam-bob 2.6s ease-in-out infinite;
+  }
+  .foam b:nth-child(2) { animation-delay: 0.4s; transform: translateY(-30%); }
+  .foam b:nth-child(3) { animation-delay: 0.8s; transform: translateY(-10%); }
+  .foam b:nth-child(4) { animation-delay: 1.2s; transform: translateY(-25%); }
+  @keyframes foam-bob {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-8%) scale(1.08); }
+  }
+  /* little steam bubbles from tub */
+  .steam {
+    position: absolute;
+    width: 10px; height: 10px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.1));
+    border-radius: 50%;
+    left: 50%; top: 20%;
+    animation: steam-up 2.4s ease-in infinite;
+  }
+  .steam.s2 { left: 40%; animation-delay: 0.6s; }
+  .steam.s3 { left: 60%; animation-delay: 1.2s; }
+  @keyframes steam-up {
+    0%   { transform: translateY(0) scale(0.6); opacity: 0; }
+    30%  { opacity: 0.8; }
+    100% { transform: translateY(-60px) scale(1.4); opacity: 0; }
+  }
+
+  .footer {
+    font-size: clamp(13px, 3.4vw, 17px);
+    color: rgba(255, 235, 220, 0.82);
+    letter-spacing: 4px;
+    opacity: 0;
+    animation: rise-in 1.4s 3.8s ease-out forwards;
+  }
+  .footer .dot { color: #ffb894; margin: 0 6px; }
+
+  /* heart pulse */
+  .heart {
+    display: inline-block;
+    color: #ff9db0;
+    animation: beat 1.4s ease-in-out infinite;
+    margin: 0 6px;
+  }
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    30%      { transform: scale(1.25); }
+    60%      { transform: scale(0.95); }
+  }
+</style>
+</head>
+<body>
+  <div class="scene"></div>
+  <div class="flicker"></div>
+
+  <!-- petals -->
+  <div id="petals"></div>
+  <!-- bubbles -->
+  <div id="bubbles"></div>
+
+  <div class="card">
+    <div class="welcome">
+      <span style="animation-delay:.3s">欢</span>
+      <span style="animation-delay:.45s">迎</span>
+      <span style="animation-delay:.6s">光</span>
+      <span style="animation-delay:.75s">临</span>
+    </div>
+
+    <div class="name-line">
+      <em>万芯瑗</em> 宝宝
+    </div>
+
+    <div class="subtitle">
+      来 体 验 泡 泡 浴 <span class="heart">♥</span>
+    </div>
+
+    <div class="tub">
+      <div class="tub-body"></div>
+      <div class="tub-water">
+        <div class="foam">
+          <b></b><b></b><b></b><b></b>
+        </div>
+      </div>
+      <div class="steam"></div>
+      <div class="steam s2"></div>
+      <div class="steam s3"></div>
+      <div class="tub-legs"><span></span><span></span></div>
+    </div>
+
+    <div class="footer">
+      灯光微暗 <span class="dot">·</span> 泡沫正好 <span class="dot">·</span> 只等你来
+    </div>
+  </div>
+
+<script>
+  // spawn falling petals
+  const petals = document.getElementById('petals');
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.animationDuration = (7 + Math.random()*7) + 's';
+    p.style.animationDelay = (Math.random()*6) + 's';
+    p.style.transform = `scale(${0.6 + Math.random()*0.9})`;
+    p.style.opacity = 0.5 + Math.random()*0.5;
+    petals.appendChild(p);
+  }
+  // spawn rising bubbles
+  const bubbles = document.getElementById('bubbles');
+  for (let i = 0; i < 30; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 8 + Math.random()*28;
+    b.style.width = b.style.height = size + 'px';
+    b.style.left = Math.random()*100 + 'vw';
+    b.style.animationDuration = (7 + Math.random()*8) + 's';
+    b.style.animationDelay = (Math.random()*8) + 's';
+    bubbles.appendChild(b);
+  }
+</script>
+</body>
+</html>
